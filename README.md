@@ -96,7 +96,7 @@ front-api-7454995d66-9lssd   1/1     Running   0          8s    172.16.251.134  
 front-api-7454995d66-mccmd   1/1     Running   0          8s    172.16.108.206   worker2.moonorb.cloud   <none>           <none>
 ``` 
 
-Summary: All 3 Nodes->Tainted, Pods which belonged to Frontend Deployment tolerated the taint but Redis did not have toleration therefore it was not scheduled anywhere. 
+Summary: All 3 Nodes->Tainted, Pods which belonged to Frontend Deployment tolerated the taint but backend did not have toleration therefore it was not scheduled anywhere. 
 
 ---------------------------------------------------------------------------------------------------------
 ### Scenario4
