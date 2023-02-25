@@ -196,6 +196,7 @@ front-api-67699cc7cf-dhcsx   1/1     Running   0          3s      172.16.108.222
 front-api-67699cc7cf-qf25p   1/1     Running   0          4s      172.16.108.221   worker2.moonorb.cloud   <none>           <none>
 ```
 
-![taints-affinity](https://user-images.githubusercontent.com/46006590/221327443-6c536239-9a1c-443a-80ec-5fd06224fe77.PNG)
+
+![taints-affinity](https://user-images.githubusercontent.com/46006590/221332028-a2e35bb7-9e4a-4c84-b1be-738713d4dc72.PNG)
 
 
