@@ -1,14 +1,14 @@
 # taints_tolerations_affinity
-The aim of this exercise is to practice taints/tolerations/affinity by applying with a simple example.
+The aim of this exercise is to practice taints/tolerations/affinity.
 
-There is 1 master and 3 workers in our K8s cluster. 
+K8s cluster has 1 master and 3 workers.
 For the purpose of testing:
 - worker1->back-api-redis(backend)
 - worker2->front-api-flask(frontend)
 - worker3->everything else
 
 Our sample application consist of 2 deployments where each has 3 replicas with a total of 6 pods. Deployments are redis/backend and flask-api/frontend. 
-Normally when deployed 6 pods should be randomly distributed to 2 workers but we will modify the deployments so the backend will be on worker1 and frontend will be scheduled on worker2.
+Normally when deployed 6 pods should be randomly distributed to 2 workers but we will modify the deployments so the backend will be on worker1 and frontend will be scheduled on worker2. This repo will focus on only the deployment manifests. Working code can be found at a separate repo: https://github.com/moonorb/flask-redis
 
 ![screenshot-1-1](https://user-images.githubusercontent.com/46006590/221326246-7c1fbcb5-858f-40ab-b238-87dadcb81765.PNG)
 
@@ -17,8 +17,8 @@ Normally when deployed 6 pods should be randomly distributed to 2 workers but we
 - Worker3 without taint
 - No Toleration
 
-If any of the workers were without any taint, all the pods would be scheduled on that node.  
-All the pods getting scheduled on worker3 because its the only one withouto taint.  
+If any of the workers were WITHOUT any taint, all the pods would be scheduled on that node.  
+All the pods getting scheduled on worker3 because its the only one without taint.  
 
 ```
 kubectl taint nodes worker1.moonorb.cloud workload=DBgroup:NoSchedule
@@ -62,7 +62,7 @@ worker3.moonorb.cloud   [map[effect:NoSchedule key:workload value:all_else]]
 k delete -f . -nflask
 k create -f . -nflask
 ``` 
-Inless pods have a matched toleration, they can't be scheduled to any of the workers due to the taint. 
+Unless pods have a matched toleration, they can't be scheduled to any of the workers due to the taint. 
 ``` 
 k get po -n flask -o wide
 NAME                         READY   STATUS    RESTARTS   AGE   IP       NODE     NOMINATED NODE   READINESS GATES
@@ -78,12 +78,11 @@ front-api-6549c65dc9-mx42n   0/1     Pending   0          6s    <none>   <none> 
 - Worker[1,2,3] still all tainted.
 - Only Frontend deployment has Toleration with Operator:Equal
 
-Add toleration to one of the deployments(frontend) so the pods CAN be scheduled to the workers. But which one? 
+Adding toleration to the frontend deployment overrides the taint so the pods CAN be scheduled to the workers. But which one? 
 
 ![screenshot-2-2](https://user-images.githubusercontent.com/46006590/221327103-2bf40e0b-1af0-4348-9fa1-adf6a34f9dd5.PNG)
 
-After recreating both deployments only frontend is deployed but not on any particular worker. Its distributed randomly between worker1 and worker2 only but not on worker3.
-Why? because the toleration key for worker3 was "all_else" which does not match what we have in the deployment config "DBgroup" which matches with taint value for worker1 and worker2. 
+After recreating both deployments only frontend is deployed but not on any particular worker. It's distributed randomly between worker1 and worker2 only but not on worker3. Why? Because the toleration key for worker3 was "all_else" which does not match what we have in the deployment config "DBgroup" which matches with taint value for worker1 and worker2. 
 ``` 
 john@master1:~/x/flask$ k get po -n flask -o wide
 NAME                         READY   STATUS    RESTARTS   AGE   IP               NODE                 NOMINATED NODE   READINESS GATES
@@ -103,11 +102,11 @@ Summary: All 3 Nodes->Tainted, Pods which belonged to Frontend Deployment tolera
 - Frontend deployment has Toleration(Equal)
 - Backend deployment also has Toleration(Exists)
 
-We add Toleration to Redis/Backend deployment in a slightly different way where the key:value pair of the toleration is not explicitly defined as before but only key(workload) is defined with an operator of "Equal" which is sufficient. 
+We add Toleration to Redis/Backend deployment in a slightly different way where the key:value pair of the toleration is not explicitly defined as before but only key(workload) is defined with an operator of "Equal" this time. 
 
 ![screenshot-3-3](https://user-images.githubusercontent.com/46006590/221327114-331f9ead-3d40-451f-912d-a40ea0fa8620.PNG)
 
-After recreating the pods they are all scheduled but randomly. In We can see now back-api pods are also scheduled to worker3 because we did not specify the value so its acceptable. 
+After recreating the pods they are all scheduled but randomly. We can see back-api pods are also scheduled to worker3(which has key:workload)because we did not specify the value so its acceptable. 
 ``` 
 john@master1:~/x/flask$ k get po -n flask -o wide
 NAME                         READY   STATUS    RESTARTS   AGE   IP               NODE                 NOMINATED NODE   READINESS GATES
@@ -119,7 +118,7 @@ front-api-7454995d66-8kcj6   1/1     Running   0          2s    172.16.251.137  
 front-api-7454995d66-xpdz7   1/1     Running   0          2s    172.16.251.135   worker1.moonorb.cloud   <none>           <none>
 ``` 
 
-All the pods have tolerants but we are all over the place next step is to make sure back-api is ONLY scheduled to worker1 and worker2 and Frontend is scheduled to worker3. 
+All the pods have tolerants but we are all over the place next step is to make sure back-api is ONLY scheduled to worker1 and Frontend is scheduled to worker2. 
 
 ---------------------------------------------------------------------------------------------------------
 ### Scenario-5
@@ -155,7 +154,7 @@ affinity:
 
 ![screenshot-4](https://user-images.githubusercontent.com/46006590/221327308-1dfd95c4-8b35-4fa7-8be2-b8abb6a04cb4.PNG)
 
-While all the backend pods are scheduled to worker1 frontapi pods are distributed randomly across all workers. 
+While all the backend pods are scheduled to worker1, Frontend pods are distributed randomly across all workers. 
 ```
 john@master1:~/x/flask$ k get po -n flask -o wide
 NAME                         READY   STATUS    RESTARTS   AGE   IP               NODE                 NOMINATED NODE   READINESS GATES
@@ -166,9 +165,9 @@ front-api-5b46fffb7c-dkdms   1/1     Running   0          3s    172.16.238.30   
 front-api-5b46fffb7c-shbqt   1/1     Running   0          3s    172.16.108.219   worker2.moonorb.cloud   <none>           <none>
 front-api-5b46fffb7c-w4sl6   1/1     Running   0          3s    172.16.251.166   worker1.moonorb.cloud   <none>           <none>
 ```
+So we still haven't achieved our final goal yet. 
 
 ### Scenario-6
-
 - Worker[1,2,3] still all tainted. 
 - Both deployments have Tolerations(operator:Exists). 
 - Worker[1,2] nodes labelled. Worker3 has no label. 
