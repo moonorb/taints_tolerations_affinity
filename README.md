@@ -16,8 +16,7 @@ Normally when deployed 6 pods should be randomly distributed to 2 workers but we
 - Worker[1,2] tainted.
 - Worker3 without taint
 - No Toleration
-
-If any of the workers were WITHOUT any taint, all the pods would be scheduled on that node.  
+ 
 All the pods getting scheduled on worker3 because its the only one without taint.  
 
 ```
