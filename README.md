@@ -52,12 +52,13 @@ front-api-6549c65dc9-mx42n   0/1     ContainerCreating   0          51s   <none>
 - No Toleration.
 ```
 kubectl taint nodes worker3.moonorb.cloud workload=all_else:NoSchedule
-kubectl get nodes -o custom-columns=NAME:.metadata.name,TAINTS:.spec.taints --no-headers
+
 kubectl get nodes -o custom-columns=NAME:.metadata.name,TAINTS:.spec.taints --no-headers
 master1.moonorb.cloud   [map[effect:NoSchedule key:node-role.kubernetes.io/control-plane]]
 worker1.moonorb.cloud   [map[effect:NoSchedule key:workload value:DBgroup]]
 worker2.moonorb.cloud   [map[effect:NoSchedule key:workload value:DBgroup]]
 worker3.moonorb.cloud   [map[effect:NoSchedule key:workload value:all_else]]
+
 k delete -f . -nflask
 k create -f . -nflask
 ``` 
