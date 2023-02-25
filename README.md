@@ -86,7 +86,7 @@ Adding toleration to the frontend deployment overrides the taint so the pods CAN
 
 After recreating both deployments only frontend is deployed but not on any particular worker. It's distributed randomly between worker1 and worker2 only but not on worker3. Why? Because the toleration key for worker3 was "all_else" which does not match what we have in the deployment config "DBgroup" which matches with taint value for worker1 and worker2. 
 ``` 
-john@master1:~/x/flask$ k get po -n flask -o wide
+k get po -n flask -o wide
 NAME                         READY   STATUS    RESTARTS   AGE   IP               NODE                 NOMINATED NODE   READINESS GATES
 back-api-5b595dc89f-chh5m    0/1     Pending   0          8s    <none>           <none>               <none>           <none>
 back-api-5b595dc89f-jm6x7    0/1     Pending   0          8s    <none>           <none>               <none>           <none>
@@ -111,7 +111,7 @@ We add Toleration to Redis/Backend deployment in a slightly different way where 
 
 After recreating the pods they are all scheduled but randomly. We can see back-api pods are also scheduled to worker3(which has key:workload)because we did not specify the value so its acceptable. 
 ``` 
-john@master1:~/x/flask$ k get po -n flask -o wide
+k get po -n flask -o wide
 NAME                         READY   STATUS    RESTARTS   AGE   IP               NODE                 NOMINATED NODE   READINESS GATES
 back-api-7bd4bbb6f-s8l7t     1/1     Running   0          2s    172.16.238.27    worker3.moonorb.cloud   <none>           <none>
 back-api-7bd4bbb6f-wmqkc     1/1     Running   0          2s    172.16.108.207   worker2.moonorb.cloud   <none>           <none>
@@ -134,9 +134,8 @@ All the pods have tolerants but we are all over the place next step is to make s
 kubectl get nodes --show-labels (no labels)
 kubectl label nodes worker1.moonorb.cloud workload=database
 kubectl label nodes worker2.moonorb.cloud workload=api
-kubectl get nodes -l workload
 
-ohn@master1:~/x/flask$ kubectl get nodes -l workload
+kubectl get nodes -l workload
 NAME                 STATUS   ROLES    AGE     VERSION
 worker1.moonorb.cloud   Ready    <none>   4d23h   v1.25.0
 worker2.moonorb.cloud   Ready    <none>   3h36m   v1.25.0
@@ -159,7 +158,7 @@ affinity:
 
 While all the backend pods are scheduled to worker1, Frontend pods are distributed randomly across all workers. 
 ```
-john@master1:~/x/flask$ k get po -n flask -o wide
+k get po -n flask -o wide
 NAME                         READY   STATUS    RESTARTS   AGE   IP               NODE                 NOMINATED NODE   READINESS GATES
 back-api-79c6874546-c94f7    1/1     Running   0          3s    172.16.251.165   worker1.moonorb.cloud   <none>           <none>
 back-api-79c6874546-cjt2g    1/1     Running   0          3s    172.16.251.168   worker1.moonorb.cloud   <none>           <none>
@@ -180,8 +179,6 @@ So we still haven't achieved our final goal yet.
 
 ```
 kubectl get nodes --show-labels
-
-john@master1:~/x/flask$ kubectl get nodes --show-labels
 NAME                 STATUS   ROLES           AGE     VERSION   LABELS
 master1.moonorb.cloud   Ready    control-plane   5d1h    v1.25.0   beta.kubernetes.io/arch=amd64,beta.kubernetes.io/os=linux,kubernetes.io/arch=amd64,kubernetes.io/hostname=master1.moonorb.cloud,kubernetes.io/os=linux,node-role.kubernetes.io/control-plane=,node.kubernetes.io/exclude-from-external-load-balancers=
 worker1.moonorb.cloud   Ready    <none>          5d1h    v1.25.0   beta.kubernetes.io/arch=amd64,beta.kubernetes.io/os=linux,kubernetes.io/arch=amd64,kubernetes.io/hostname=worker1.moonorb.cloud,kubernetes.io/os=linux,workload=database
@@ -189,7 +186,7 @@ worker2.moonorb.cloud   Ready    <none>          5d1h    v1.25.0   beta.kubernet
 worker3.moonorb.cloud   Ready    <none>          5h36m   v1.25.0   beta.kubernetes.io/arch=amd64,beta.kubernetes.io/os=linux,kubernetes.io/arch=amd64,kubernetes.io/hostname=worker3.moonorb.cloud,kubernetes.io/os=linux
 ```
 ```
-john@master1:~/x/flask$ k get po -n flask -o wide
+k get po -n flask -o wide
 NAME                         READY   STATUS    RESTARTS   AGE     IP               NODE                 NOMINATED NODE   READINESS GATES
 back-api-79c6874546-c94f7    1/1     Running   0          7m25s   172.16.251.165   worker1.moonorb.cloud   <none>           <none>
 back-api-79c6874546-cjt2g    1/1     Running   0          7m25s   172.16.251.168   worker1.moonorb.cloud   <none>           <none>
