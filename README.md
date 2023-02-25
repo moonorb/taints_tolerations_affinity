@@ -8,7 +8,7 @@ For the purpose of testing:
 - worker3->everything else
 
 Sample application consist of 2 deployments where each has 3 replicas with a total of 6 pods. Deployments are redis/backend and flask-api/frontend. 
-Normally when deployed 6 pods should be randomly distributed to 2 workers but we will modify the deployments so the backend will be on worker1 and frontend will be scheduled on worker2. This repo will focus on only the deployment manifests. Working code can be found at a separate repo: https://github.com/moonorb/flask-redis
+Normally when deployed 6 pods should be randomly distributed to 2 workers but we will modify the deployments step by step so the backend will be on worker1 and frontend will be scheduled on worker2 on Scneraio 6. This repo will focus on only the deployment manifests. Working code can be found at a separate repo: https://github.com/moonorb/flask-redis
 
 ![screenshot-1-1](https://user-images.githubusercontent.com/46006590/221326246-7c1fbcb5-858f-40ab-b238-87dadcb81765.PNG)
 
