@@ -10,7 +10,8 @@ For the purpose of testing:
 Sample application consist of 2 deployments where each has 3 replicas with a total of 6 pods. Deployments are redis/backend and flask-api/frontend. 
 Normally when deployed 6 pods should be randomly distributed to 2 workers but we will modify the deployments step by step so the backend will be on worker1 and frontend will be scheduled on worker2 on Scneraio 6. This repo will focus on only the deployment manifests. Working code can be found at a separate repo: https://github.com/moonorb/flask-redis
 
-![screenshot-1-1](https://user-images.githubusercontent.com/46006590/221326246-7c1fbcb5-858f-40ab-b238-87dadcb81765.PNG)
+![screenshot-1](https://user-images.githubusercontent.com/46006590/221331847-90e1a7d4-59c9-4e3d-8b4c-0ea3a8bf0524.PNG)
+
 
 ### Scenario-1
 - Worker[1,2] tainted.
@@ -80,7 +81,8 @@ front-api-6549c65dc9-mx42n   0/1     Pending   0          6s    <none>   <none> 
 
 Adding toleration to the frontend deployment overrides the taint so the pods CAN be scheduled to the workers. But which one? 
 
-![screenshot-2-2](https://user-images.githubusercontent.com/46006590/221327103-2bf40e0b-1af0-4348-9fa1-adf6a34f9dd5.PNG)
+![screenshot-2](https://user-images.githubusercontent.com/46006590/221331855-59b11308-25be-4df3-ba47-51b895c4f9b8.PNG)
+
 
 After recreating both deployments only frontend is deployed but not on any particular worker. It's distributed randomly between worker1 and worker2 only but not on worker3. Why? Because the toleration key for worker3 was "all_else" which does not match what we have in the deployment config "DBgroup" which matches with taint value for worker1 and worker2. 
 ``` 
@@ -104,7 +106,8 @@ Summary: All 3 Nodes->Tainted, Pods which belonged to Frontend Deployment tolera
 
 We add Toleration to Redis/Backend deployment in a slightly different way where the key:value pair of the toleration is not explicitly defined as before but only key(workload) is defined with an operator of "Equal" this time. 
 
-![screenshot-3-3](https://user-images.githubusercontent.com/46006590/221327114-331f9ead-3d40-451f-912d-a40ea0fa8620.PNG)
+![screenshot-3](https://user-images.githubusercontent.com/46006590/221331862-53554b97-4775-4565-9671-54879d95f0fa.PNG)
+
 
 After recreating the pods they are all scheduled but randomly. We can see back-api pods are also scheduled to worker3(which has key:workload)because we did not specify the value so its acceptable. 
 ``` 
